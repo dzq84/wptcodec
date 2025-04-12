@@ -10,7 +10,6 @@ def audio_to_mel(audio, sample_rate):
         n_mels=128
     ).to(audio.device)
     mel = mel_spectrogram(audio)
-    # 将Power Spectrogram转为DB单位
     mel_db = T.AmplitudeToDB()(mel)
     return mel_db
 
@@ -74,34 +73,19 @@ def batch_mel(audio_data, sample_rate=44100, window_length=None, n_mels=128, f_m
 import pywt
 
 def batch_wdt(audio_data, wavelet='db1', max_level=3,mode='symmetric'):
-    """
-    对每个音频信号进行小波包变换并返回所有频率分量。
-
-    Args:
-        audio_data (torch.Tensor): 形状为 (B, C, T) 的音频数据张量
-        wavelet (str): 小波类型，默认为 'db1'（Haar 小波）
-        max_level (int): 小波包变换的最大层数
-
-    Returns:
-        torch.Tensor: 形状为 (B, C, T1) 的张量，包含所有分量的信号
-    """
     B, C, T = audio_data.shape
     all_components = []
 
-    # 对每个音频信号进行小波包变换
     for b in range(B):
         components = []
         for c in range(C):
-            signal = audio_data[b, c].cpu().numpy()  # 将每个信号转换为 numpy 数组
+            signal = audio_data[b, c].cpu().numpy()  
             wp = pywt.WaveletPacket(data=signal, wavelet=wavelet, mode=mode, maxlevel=max_level)
-            # 获取小波包变换的频率节点
             nodes = wp.get_level(max_level, 'freq')
             
-            # 获取所有频率分量
             for node in nodes:
-                components.append(torch.tensor(node.data))  # 转换每个分量为 Tensor
-        # 将每个 batch 的所有分量合并
-        all_components.append(torch.stack(components, dim=0))  # 按照频率维度进行堆叠
+                components.append(torch.tensor(node.data))  
 
-    # 将所有分量转换为形状 (B, C, T1)
+        all_components.append(torch.stack(components, dim=0))
+
     return torch.stack(all_components, dim=0).to(audio_data.device)
