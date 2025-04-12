@@ -1,0 +1,14 @@
+batch_size: 8
+sample_rate: 16000
+#segment_length_train: 16384
+#segment_length_train: 24064
+segment_length_train: 16000
+
+#segment_length_train: 1
+segment_length_test: 1
+num_workers: 8
+devices: [1,2]
+train_dir: "/datasets/LibriSpeech/train-clean-100"
+test_dir: "/datasets/LibriSpeech/train-clean-100"
+log_dir: './daccodec-speech-small'
+log_name: 'daccodec-speech-small'
